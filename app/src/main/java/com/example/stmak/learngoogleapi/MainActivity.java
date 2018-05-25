@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements
         if(data == null || data.getCount() == 0 ) return;
         List<String> guids = new ArrayList<>();
         while(data.moveToNext()) {
-            guids.add(data.getString(data.getColumnIndex(PlaceContract.PlaceEntry.COLUMNS_PLACE_ID)));
+            guids.add(data.getString(data.getColumnIndex(PlaceContract.PlaceEntry.COLUMN_PLACE_ID)));
         }
         PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi.getPlaceById(mClient,
                 guids.toArray(new String[guids.size()]));
