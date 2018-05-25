@@ -1,6 +1,7 @@
 package com.example.stmak.learngoogleapi;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -24,6 +25,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -120,6 +122,26 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, String.format("GooglePlayServices Not Available [%s]", e.getMessage()));
         } catch (Exception e) {
             Log.e(TAG, String.format("PlacePicker Exception: %s", e.getMessage()));
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
+            Place place = PlacePicker.getPlace(this, data);
+            if( place == null) {
+                Log.i(TAG, "No place selected");
+                return;
+            }
+
+            String placeID = place.getId();
+
+            // Insert a new place into DB
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(PlaceContract.PlaceEntry.COLUMN_PLACE_ID, placeID);
+            getContentResolver().insert(PlaceContract.PlaceEntry.CONTENT_URI, contentValues);
+
+            // Get live data information
+            refreshPlacesData();
         }
     }
 
