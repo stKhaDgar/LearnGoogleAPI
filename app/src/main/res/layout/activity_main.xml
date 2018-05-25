@@ -35,10 +35,10 @@
             android:layout_marginTop="4dp"
             android:background="@color/colorPrimary" />
 
-        <view class="android.support.v7.app.AlertController$RecycleListView"
+        <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:id="@+id/places_list_recycler_view"
-            android:layout_height="wrap_content"> </view>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
     
