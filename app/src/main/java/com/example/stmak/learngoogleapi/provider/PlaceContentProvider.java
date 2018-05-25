@@ -77,7 +77,7 @@ public class PlaceContentProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Nullable
@@ -111,11 +111,60 @@ public class PlaceContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        // Get access to the database and write URI matching code to recognize a single item
+        final SQLiteDatabase db = mPlaceDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        // Keep track of the number of deleted places
+        int placesDeleted; // starts as 0
+        switch(match) {
+            // Handle the single item case, recognized by the ID included in the URI path
+            case PLACE_WITH_ID:
+                // Get the place ID from the URI path
+                String id = uri.getPathSegments().get(1);
+                // Use selections/selectionArgs to filter for thid ID
+                placesDeleted = db.delete(PlaceContract.PlaceEntry.TABLE_NAME, "_id=?", new String[]{id});
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        // Notify the resolver of a change and return the number of items deleted
+        if (placesDeleted != 0) {
+            // A place (or more) was deleted. set notification
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of places deleted
+        return placesDeleted;
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
-    }
+
+        // Get access to underlying database
+        final SQLiteDatabase db = mPlaceDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        // Keep track of the number of updated places
+        int placesUpdated;
+
+        switch (match) {
+            case PLACE_WITH_ID:
+                // Get the place ID from the URI path
+                String id = uri.getPathSegments().get(1);
+                // Use selections/selectionArgs to filter for this ID
+                placesUpdated = db.update(PlaceContract.PlaceEntry.TABLE_NAME, values, "_id=?", new String[]{id});
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        // Notify the resolver of a change and return the number of items updated
+        if(placesUpdated != 0) {
+            // A place (or more) was updated. set notification
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of places deleted
+        return placesUpdated;
+     }
 }
